@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "price_history_test", schema = "amazonservice")
+@Table(name = "price_history", schema = "amazonservice")
 public class PriceHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "amazonservice.price_history_id_seq")

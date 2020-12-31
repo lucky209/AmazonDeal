@@ -160,7 +160,7 @@ public class TodaysDealService {
         return lastPage;
     }
 
-    public void clickReviewFilter(WebDriver browser) throws Exception {
+    void clickReviewFilter(WebDriver browser) throws Exception {
         try {
             List<WebElement> filters = browser.findElements(By.cssSelector(AmazonConstants.FILTER_CSS_CLASS));
             if (!filters.isEmpty()) {
@@ -180,7 +180,7 @@ public class TodaysDealService {
         }
     }
 
-    public void clickActiveProducts(WebDriver browser) throws Exception {
+    void clickActiveProducts(WebDriver browser) throws Exception {
         try {
             List<WebElement> filters = browser.findElements(By.cssSelector(AmazonConstants.FILTER_CSS_CLASS));
             if (!filters.isEmpty()) {
@@ -197,7 +197,7 @@ public class TodaysDealService {
         }
     }
 
-    public void clickDiscountFilter(WebDriver browser) throws Exception {
+    void clickDiscountFilter(WebDriver browser) throws Exception {
         try {
             if (propertiesRepo.findByPropName(PropertyConstants.DISCOUNT_PERCENTAGE).isEnabled()) {
                 String discount = propertiesRepo.findByPropName(PropertyConstants.DISCOUNT_PERCENTAGE).getPropValue();

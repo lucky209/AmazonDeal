@@ -1,12 +1,13 @@
 package offer.compass.amazondeal.config;
 
 import lombok.extern.slf4j.Slf4j;
-import offer.compass.amazondeal.entities.PropertiesRepo;
 import offer.compass.amazondeal.entities.SchedulerControl;
 import offer.compass.amazondeal.entities.SchedulerRepo;
+import offer.compass.amazondeal.schedulers.CleanupScheduler;
 import offer.compass.amazondeal.schedulers.TodaysDealScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -20,19 +21,23 @@ import java.util.Date;
 public class SchedulerConfig implements SchedulingConfigurer {
 
     private static final String TODAYS_DEAL_SCEDULER_PROPERTY_NAME="todays.deal.cron";
+    private static final String PRICE_HISTORY_SCEDULER_PROPERTY_NAME = "price.hisotry.cleanup.cron";
 
     @Autowired
     private TodaysDealScheduler todaysDealScheduler;
+    @Autowired
+    private CleanupScheduler cleanupScheduler;
     @Autowired
     private SchedulerRepo schedulerRepo;
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        SchedulerControl todaysDealSchedulerEntity = schedulerRepo
+        SchedulerControl todaysDealEntity = schedulerRepo
                 .findByScheduler(TODAYS_DEAL_SCEDULER_PROPERTY_NAME);
+        //get today's deal products
         taskRegistrar.addTriggerTask(
                 () -> {
-                    if (todaysDealSchedulerEntity.isEnabled()) {
+                    if (todaysDealEntity.isEnabled()) {
                         try {
                             todaysDealScheduler.getTodaysDealProducts();
                         } catch (Exception e) {
@@ -40,15 +45,40 @@ public class SchedulerConfig implements SchedulingConfigurer {
                         }
                     }
                 }, triggerContext -> {
-                    String cron = todaysDealSchedulerEntity.getCron();
-                    CronTrigger trigger = new CronTrigger(cron);
-                    Date nextExecutionTime = trigger
-                            .nextExecutionTime(triggerContext);
-                    todaysDealSchedulerEntity.setNextExecutionTime(nextExecutionTime);
-                    schedulerRepo.save(todaysDealSchedulerEntity);
-                    log.info("next Execution Time is " + nextExecutionTime);
+                    Date nextExecutionTime = this.saveNextExecutionTime(
+                            todaysDealEntity, triggerContext);
+                    log.info("next Execution Time of todays deal scheduler is " + nextExecutionTime);
                     return nextExecutionTime;
                 }
         );
+
+        //clean up price history entities
+        SchedulerControl priceHistoryEntity = schedulerRepo
+                .findByScheduler(PRICE_HISTORY_SCEDULER_PROPERTY_NAME);
+        taskRegistrar.addTriggerTask(
+                () -> {
+                    if (priceHistoryEntity.isEnabled()) {
+                        try {
+                            cleanupScheduler.cleanupPriceHistoryEntities();
+                        } catch (Exception e) {
+                            log.info("Exception occurred, " + e.getMessage());
+                        }
+                    }
+                }, triggerContext -> {
+                    Date nextExecutionTime = this.saveNextExecutionTime(
+                            priceHistoryEntity, triggerContext);
+                    log.info("next Execution Time of price history scheduler is " + nextExecutionTime);
+                    return nextExecutionTime;
+                }
+        );
+    }
+
+    private Date saveNextExecutionTime(SchedulerControl schedulerEntity, TriggerContext triggerContext) {
+        CronTrigger trigger = new CronTrigger(schedulerEntity.getCron());
+        Date nextExecutionTime = trigger
+                .nextExecutionTime(triggerContext);
+        schedulerEntity.setNextExecutionTime(nextExecutionTime);
+        schedulerRepo.save(schedulerEntity);
+        return nextExecutionTime;
     }
 }

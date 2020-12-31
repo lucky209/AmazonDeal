@@ -60,6 +60,7 @@ public class AmazonServiceImpl implements AmazonService {
     @Override
     @Transactional
     public boolean getUrlsByDepartment() throws Exception {
+        //delete last run records
         todaysDealService.deleteTodaysDealAllRecords();
         //initialize variables
         int maxThreads = Integer.parseInt(propertiesRepo.findByPropName(PropertyConstants.POOL_SIZE).getPropValue());
@@ -82,8 +83,6 @@ public class AmazonServiceImpl implements AmazonService {
 
     @Override
     public boolean getPriceHistoryByUrls() throws InterruptedException, IOException {
-        //delete images
-        FileUtils.deleteDirectory(new File(AmazonConstants.PATH_TO_SAVE_SS));
         //get urls from todays deal table
         List<TodaysDealUrl> todaysDealUrlList = todaysDealUrlRepo.findAll();
         List<String> urls = todaysDealUrlList.stream().map(TodaysDealUrl::getUrl).collect(Collectors.toList());

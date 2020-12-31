@@ -48,8 +48,10 @@ public class PriceHistoryHelper {
         Integer currentPrice = todaysDealUrl.getPrice();
         //check good offer
         boolean isGoodOffer = this.isGoodOfferProduct(lowestPrice, highestPrice, currentPrice);
-        //if good offer take SS
-        if (isGoodOffer) {
+        //check existing product
+        boolean isExistingProduct = this.isExistingProduct(url, currentPrice);
+        //if good offer and not existing product take SS
+        if (isGoodOffer && !isExistingProduct) {
             browser.get(url);
             //1.draw border on regular price box
             this.drawRedBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
@@ -146,16 +148,11 @@ public class PriceHistoryHelper {
         fileHelper.saveAmazonSS(browser, pathToSave, folderPath);
     }
 
-    private void showPriceAlertBox(WebDriver browser, int lowestPrice, int highestPrice) {
-        String alertHtmlMessage = "Lowest Price : " + lowestPrice + "\n" +
-                "Highest Price : " + highestPrice;
-        JavascriptExecutor jse = (JavascriptExecutor) browser;
-        jse.executeScript("alert('jghjg');");
-    }
-
-    private void takeScreenShotOfPHGraph(Integer currentPrice, String prodName, WebDriver browser) throws IOException {
-        String ssName = this.getScreenshotName(prodName, currentPrice);
-        String pathToSave = PriceHistoryConstants.PATH_TO_SAVE_SS + ssName;
-        fileHelper.savePriceHistorySS(browser, pathToSave);
+    private boolean isExistingProduct(String url, Integer currentPrice) {
+        PriceHistory existingEntity = priceHistoryRepo.findByUrl(url);
+        if (existingEntity != null) {
+            return existingEntity.getCurrentPrice().equals(currentPrice);
+        }
+        return false;
     }
 }

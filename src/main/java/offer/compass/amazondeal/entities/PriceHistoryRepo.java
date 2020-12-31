@@ -16,4 +16,6 @@ public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
 
     @Query(value = "select * from amazonservice.price_history where is_good_offer=true", nativeQuery = true)
     List<PriceHistory> getGoodOfferProducts();
+
+    PriceHistory findByUrl(String url);
 }
