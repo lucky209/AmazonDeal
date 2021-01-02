@@ -4,6 +4,7 @@ public class Constants {
 
     public static final String NEW_TAB_SCRIPT = "window.open()";
     public static final String DRAW_RED_BORDER_SCRIPT = "arguments[0].style.border='6px solid red'";
+    public static final String DRAW_BLUE_BORDER_SCRIPT = "arguments[0].style.border='6px solid blue'";
     public static final String ATTRIBUTE_HREF = "href";
     public static final String TAG_ANCHOR = "a";
     public static final String TAG_SPAN = "span";

@@ -30,10 +30,6 @@ public class TodaysDealService {
     private DepartmentRepo departmentRepo;
     @Autowired
     private PropertiesRepo propertiesRepo;
-    @Autowired
-    private TodaysDealUrlRepo todaysDealUrlRepo;
-    @Autowired
-    private PriceHistoryRepo priceHistoryRepo;
 
     private void clickNextButton(WebDriver browser) throws InterruptedException {
         List<WebElement> webElementList = browser.findElements(
@@ -238,15 +234,5 @@ public class TodaysDealService {
         if (removalList.size() > 0) {
             prodList.removeAll(removalList);
         }
-    }
-
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void deleteTodaysDealAllRecords() {
-        todaysDealUrlRepo.deleteAllRecords();
-    }
-
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void deleteAllPriceHistoryRecords() {
-        priceHistoryRepo.deleteAllRecords();
     }
 }

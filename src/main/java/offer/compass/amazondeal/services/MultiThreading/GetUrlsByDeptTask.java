@@ -29,7 +29,7 @@ public class GetUrlsByDeptTask {
         this.todaysDealUrlRepo = todaysDealUrlRepo;
     }
 
-    public void getUrlsProcess(String deptName) throws Exception {
+    void getUrlsProcess(String deptName) throws Exception {
         try {
             //get browser
             browser = browserHelper.openBrowser(false, AmazonConstants.TODAYS_DEAL_URL);

@@ -14,8 +14,5 @@ public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
             "ALTER SEQUENCE amazonservice.price_history_id_seq RESTART WITH 1;", nativeQuery = true)
     void deleteAllRecords();
 
-    @Query(value = "select * from amazonservice.price_history where is_good_offer=true", nativeQuery = true)
-    List<PriceHistory> getGoodOfferProducts();
-
-    PriceHistory findByUrl(String url);
+    PriceHistory findByProductNameAndCurrentPrice(String prodname, Integer currentPrice);
 }

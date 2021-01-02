@@ -9,6 +9,7 @@ public class PropertyConstants {
     public static final String CLEAN_IMAGES_ON_SERVER_UP = "clean.images.on.server.up";
     public static final String BATCH_SIZE = "batch.size";
     public static final String POOL_SIZE = "pool.size";
+    public static final String PRICE_HISTORY_POOL_SIZE = "price.history.pool.size";
     public static final String PRICE_HISTORY_SEARCH_PER_PAGE = "price.history.serach.per.page";
     public static final String HEADLESS_MODE = "headless.mode";
     public static final String REVIEW_THRESHOLD = "reviews.count.threshold";

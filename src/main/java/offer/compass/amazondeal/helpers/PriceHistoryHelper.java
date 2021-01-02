@@ -1,5 +1,6 @@
 package offer.compass.amazondeal.helpers;
 
+import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.AmazonConstants;
 import offer.compass.amazondeal.constants.Constants;
 import offer.compass.amazondeal.constants.PriceHistoryConstants;
@@ -7,13 +8,18 @@ import offer.compass.amazondeal.entities.PriceHistory;
 import offer.compass.amazondeal.entities.PriceHistoryRepo;
 import offer.compass.amazondeal.entities.TodaysDealUrl;
 import offer.compass.amazondeal.entities.TodaysDealUrlRepo;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
+@Slf4j
 public class PriceHistoryHelper {
 
     @Autowired
@@ -30,8 +36,8 @@ public class PriceHistoryHelper {
 
     private void enterUrlAndSearch(WebDriver browser, String url) throws InterruptedException {
         browser.findElement(By.xpath(PriceHistoryConstants.PRICE_HISTORY_URL_XPATH)).sendKeys(url);
-        Thread.sleep(1000);
         browser.findElement(By.id(PriceHistoryConstants.PRICE_HISTORY_TRACK_SEARCH_ID)).click();
+        Thread.sleep(1000);
     }
 
     public void savePriceHistoryDetails(WebDriver browser, String url) throws IOException {
@@ -49,17 +55,19 @@ public class PriceHistoryHelper {
         //check good offer
         boolean isGoodOffer = this.isGoodOfferProduct(lowestPrice, highestPrice, currentPrice);
         //check existing product
-        boolean isExistingProduct = this.isExistingProduct(url, currentPrice);
+        boolean isExistingProduct = this.isExistingProduct(prodName, currentPrice);
         //if good offer and not existing product take SS
         if (isGoodOffer && !isExistingProduct) {
             browser.get(url);
             //1.draw border on regular price box
-            this.drawRedBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
+            this.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
             //2.draw border on reviews box
-            this.drawRedBorderById(browser, AmazonConstants.TODAYS_DEAL_REVIEW_ID);
-            //3.Now take SS
+            this.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REVIEW_ID);
+            //3.add an draw border on lowest element
+            this.drawBorderLowestAndHighestPriceElement(browser, lowestPrice, highestPrice);
+            //4.Now take SS
             this.takeAmazonProductScreenShot(browser, todaysDealUrl.getDept(), prodName);
-            //4.save in DB
+            //5.save in DB
             this.saveInDB(lowestPrice, highestPrice, currentPrice, url,
                     "amazon", dropChances, prodName, true);
         }
@@ -133,7 +141,7 @@ public class PriceHistoryHelper {
                 .replace(Constants.UTIL_COMMA, Constants.UTIL_EMPTY_QUOTE).trim());
     }
 
-    private void drawRedBorderById(WebDriver browser, String id){
+    private void drawBorderById(WebDriver browser, String id){
         boolean isElementAvailable = !browser.findElements(By.id(id)).isEmpty();
         if (isElementAvailable) {
             JavascriptExecutor jse = (JavascriptExecutor) browser;
@@ -148,11 +156,25 @@ public class PriceHistoryHelper {
         fileHelper.saveAmazonSS(browser, pathToSave, folderPath);
     }
 
-    private boolean isExistingProduct(String url, Integer currentPrice) {
-        PriceHistory existingEntity = priceHistoryRepo.findByUrl(url);
-        if (existingEntity != null) {
-            return existingEntity.getCurrentPrice().equals(currentPrice);
-        }
-        return false;
+    private boolean isExistingProduct(String prodName, Integer currentPrice) {
+        PriceHistory existingEntity = priceHistoryRepo.findByProductNameAndCurrentPrice(prodName, currentPrice);
+        return existingEntity != null;
     }
+
+    private void drawBorderLowestAndHighestPriceElement(WebDriver browser, int lowestPrice, int highestPrice) {
+        boolean isElementAvailable = !browser.findElements(By.id(PriceHistoryConstants.PRICE_HISTORY_REPLACE_DIV)).isEmpty();
+        if (isElementAvailable) {
+            WebElement element = browser.findElement(By.id(PriceHistoryConstants.PRICE_HISTORY_REPLACE_DIV));
+            JavascriptExecutor jse = (JavascriptExecutor)browser;
+            jse.executeScript(
+                    "var ele=arguments[0]; ele.innerHTML = '<div>" +
+                            "<span id="+ PriceHistoryConstants.PRICE_HISTORY_DIV +" style=\"width: 310px;\" class=\"a-size-base priceBlockDealPriceString\">Lowest Price:₹ "+ lowestPrice + ".00 Highest Price:₹ "+ highestPrice +".00</span>" +
+                            "<div style=\"color:blue;font-size:10px;\"> highest price and lowest prices are taken from https://pricehistory.in</div>" +
+                            "</div>"+"';", element);
+            this.drawBorderById(browser, PriceHistoryConstants.PRICE_HISTORY_DIV);
+        } else {
+            log.info(PriceHistoryConstants.PRICE_HISTORY_DIV + " div is not available for the product " + lowestPrice + " " + highestPrice);
+        }
+    }
+
 }
