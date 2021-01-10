@@ -34,6 +34,7 @@ public class FileHelper {
         Graphics2D g2d = copy.createGraphics();
         g2d.setColor(Color.WHITE); // Or what ever fill color you want...
         g2d.fillRect(0, 0, copy.getWidth(), copy.getHeight());
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2d.drawImage(image, 0, 0, null);
         g2d.dispose();
         ImageIO.write(copy, Constants.IMAGE_FORMAT_V2, new File(fileNameWithPath));

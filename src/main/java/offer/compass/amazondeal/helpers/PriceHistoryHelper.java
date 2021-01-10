@@ -40,7 +40,7 @@ public class PriceHistoryHelper {
         Thread.sleep(1000);
     }
 
-    public void savePriceHistoryDetails(WebDriver browser, String url) throws IOException {
+    public void savePriceHistoryDetails(WebDriver browser, String url) throws IOException, InterruptedException {
         //get lowest price
         Integer lowestPrice = this.getLowestPrice(browser);
         //get highest price
@@ -59,6 +59,7 @@ public class PriceHistoryHelper {
         //if good offer and not existing product take SS
         if (isGoodOffer && !isExistingProduct) {
             browser.get(url);
+            Thread.sleep(2000);
             //1.draw border on regular price box
             this.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
             //2.draw border on reviews box
@@ -166,12 +167,12 @@ public class PriceHistoryHelper {
         if (isElementAvailable) {
             WebElement element = browser.findElement(By.id(PriceHistoryConstants.PRICE_HISTORY_REPLACE_DIV));
             JavascriptExecutor jse = (JavascriptExecutor)browser;
-            jse.executeScript(
-                    "var ele=arguments[0]; ele.innerHTML = '<div>" +
-                            "<span id="+ PriceHistoryConstants.PRICE_HISTORY_DIV +" style=\"width: 310px;\" class=\"a-size-base priceBlockDealPriceString\">Lowest Price:₹ "+ lowestPrice + ".00 Highest Price:₹ "+ highestPrice +".00</span>" +
-                            "<div style=\"color:blue;font-size:10px;\"> highest price and lowest prices are taken from https://pricehistory.in</div>" +
-                            "</div>"+"';", element);
-            this.drawBorderById(browser, PriceHistoryConstants.PRICE_HISTORY_DIV);
+            String lowestHighestHtml = AmazonConstants.PRICE_HISTORY_LOWEST_HIGHEST_PRICE_TABLE_HTML
+                    .replace("$lowestPrice" , String.valueOf(lowestPrice))
+                    .replace("$highestPrice" , String.valueOf(highestPrice));
+            jse.executeScript("var ele=arguments[0]; ele.innerHTML = " + lowestHighestHtml + ";", element);
+            this.drawBorderById(browser, AmazonConstants.PRICE_HISTORY_LOWEST_TR_ID);
+            this.drawBorderById(browser, AmazonConstants.PRICE_HISTORY_HIGHEST_TR_ID);
         } else {
             log.info(PriceHistoryConstants.PRICE_HISTORY_DIV + " div is not available for the product " + lowestPrice + " " + highestPrice);
         }
