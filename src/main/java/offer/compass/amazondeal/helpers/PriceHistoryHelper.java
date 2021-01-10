@@ -103,25 +103,6 @@ public class PriceHistoryHelper {
         return false;
     }
 
-    private String getScreenshotName(String prodName, Integer currentPrice) {
-        String screenshotName;
-        String[] array = prodName.split(Constants.UTIL_SINGLE_SPACE);
-        if (array.length > 3) {
-            screenshotName = array[0] + Constants.UTIL_SINGLE_SPACE +
-                    array[1] + Constants.UTIL_SINGLE_SPACE + array[2]
-                    + Constants.UTIL_HYPHEN;
-            if (currentPrice != null) {
-                screenshotName = screenshotName + currentPrice + Constants.IMAGE_FORMAT;
-            } else {
-                screenshotName = screenshotName + Constants.IMAGE_FORMAT;
-            }
-        } else {
-            screenshotName = prodName;
-        }
-        screenshotName = screenshotName.replace("\"", "");
-        return screenshotName;
-    }
-
     private void saveInDB(Integer lowestPrice, Integer highestPrice,
                           Integer currentPrice, String url, String site,
                           String dropChances, String prodName, boolean isGoodOffer) {
@@ -151,9 +132,8 @@ public class PriceHistoryHelper {
     }
 
     private void takeAmazonProductScreenShot(WebDriver browser, String dept, String prodName) throws IOException {
-        String ssName = this.getScreenshotName(prodName, null);
         String folderPath = AmazonConstants.PATH_TO_SAVE_SS + dept + "\\";
-        String pathToSave = folderPath + ssName;
+        String pathToSave = folderPath + prodName.substring(50) + "-" + System.currentTimeMillis();
         fileHelper.saveAmazonSS(browser, pathToSave, folderPath);
     }
 
@@ -176,5 +156,4 @@ public class PriceHistoryHelper {
             log.info("PRICE_HISTORY_REPLACE_DIV is not available for the product " + lowestPrice + " " + highestPrice);
         }
     }
-
 }

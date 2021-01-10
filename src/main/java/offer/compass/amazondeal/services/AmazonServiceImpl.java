@@ -70,6 +70,7 @@ public class AmazonServiceImpl implements AmazonService {
         pool.shutdown();
         pool.awaitTermination(10, TimeUnit.HOURS);
         log.info("Completed the getUrlsByDepartment process...");
+        log.info("Total today's deal urls are " + todaysDealUrlRepo.findAll().size());
         return true;
     }
 
