@@ -34,34 +34,20 @@ public class AmazonConstants {
 
     public static final String UTIL_AVG_CUSTOMER_REVIEW = "Avg. Customer Review";
     public static final String VALIDATION_UTIL_STRING_ADD_TO_CART = "Add to Cart";
-    public static final String PRODUCT_TITLE_ID = "productTitle";
-
     public static final String PATH_TO_SAVE_SS = "D:\\OfferCompass\\images\\";
-    public static final String PRICE_HISTORY_LOWEST_TR_ID="pricehistory_lowestPrice";
-    public static final String PRICE_HISTORY_HIGHEST_TR_ID="pricehistory_highestPrice";
+
     public static final String PRICE_HISTORY_LOWEST_HIGHEST_PRICE_TABLE_HTML=
-            "'<table class=\"a-lineitem\">" +
-                "<tbody>" +
-                    "<tr id=\"pricehistory_lowestPrice\">" +
-                        "<td id=\"priceblock_dealprice_lbl\" class=\"a-color-secondary a-size-base a-text-right a-nowrap\">" +
-                            "<b>Lowest Price:</b>" +
-                        "</td>" +
-                        "<td class=\"a-span12\">" +
-                            "<span id=\"priceblock_dealprice\" class=\"a-size-medium a-color-price priceBlockDealPriceString\">" +
-                                "₹$lowestPrice.00" +
-                            "</span>" +
-                        "</td>" +
-                    "</tr>" +
-                    "<tr id=\"pricehistory_highestPrice\">" +
-                        "<td id=\"priceblock_dealprice_lbl\" class=\"a-color-secondary a-size-base a-text-right a-nowrap\">" +
-                            "<b>Highest Price:<b>" +
-                        "</td>" +
-                        "<td class=\"a-span12\">" +
-                            "<span id=\"priceblock_dealprice\" class=\"a-size-medium a-color-price priceBlockDealPriceString\">" +
-                                "₹$highestPrice.00" +
-                            "</span>" +
-                        "</td>" +
-                    "</tr>" +
-                "</tbody>" +
-            "</table>";
+            "<div>" +
+                "<span id="+ PriceHistoryConstants.PRICE_HISTORY_DIV +" style=\"width: 320px;\" class=\"a-size-base priceBlockDealPriceString\">" +
+                    "<b>Lowest Price:</b>" +
+                    "<span>" +
+                        "₹$lowestPrice.00      " +
+                    "</span>" +
+                    "<b>Highest Price:</b> " +
+                    "<span>" +
+                        "₹$highestPrice.00" +
+                    "</span>" +
+                "</span>" +
+                "<div style=\"color:blue;font-size:12.5px;\"> Lowest price and highest price are taken from https://pricehistory.in</div>" +
+            "</div>";
 }

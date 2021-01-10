@@ -170,11 +170,10 @@ public class PriceHistoryHelper {
             String lowestHighestHtml = AmazonConstants.PRICE_HISTORY_LOWEST_HIGHEST_PRICE_TABLE_HTML
                     .replace("$lowestPrice" , String.valueOf(lowestPrice))
                     .replace("$highestPrice" , String.valueOf(highestPrice));
-            jse.executeScript("var ele=arguments[0]; ele.innerHTML = " + lowestHighestHtml + ";", element);
-            this.drawBorderById(browser, AmazonConstants.PRICE_HISTORY_LOWEST_TR_ID);
-            this.drawBorderById(browser, AmazonConstants.PRICE_HISTORY_HIGHEST_TR_ID);
+            jse.executeScript("var ele=arguments[0]; ele.innerHTML = '" + lowestHighestHtml + "';", element);
+            this.drawBorderById(browser, PriceHistoryConstants.PRICE_HISTORY_DIV);
         } else {
-            log.info(PriceHistoryConstants.PRICE_HISTORY_DIV + " div is not available for the product " + lowestPrice + " " + highestPrice);
+            log.info("PRICE_HISTORY_REPLACE_DIV is not available for the product " + lowestPrice + " " + highestPrice);
         }
     }
 
