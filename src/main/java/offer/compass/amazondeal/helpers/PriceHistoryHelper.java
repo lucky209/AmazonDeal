@@ -118,6 +118,26 @@ public class PriceHistoryHelper {
         priceHistoryRepo.save(priceHistory);
     }
 
+    private String getScreenshotName(String prodName, Integer currentPrice) {
+        String screenshotName;
+        String[] array = prodName.split(Constants.UTIL_SINGLE_SPACE);
+        if (array.length > 3) {
+            screenshotName = array[0] + Constants.UTIL_SINGLE_SPACE +
+                    array[1] + Constants.UTIL_SINGLE_SPACE + array[2]
+                    + Constants.UTIL_HYPHEN;
+            if (currentPrice != null) {
+                screenshotName = screenshotName + currentPrice ;
+            }
+        } else {
+            screenshotName = prodName;
+        }
+        screenshotName = screenshotName.replace("\"", "");
+        screenshotName = screenshotName + "-" + System.currentTimeMillis();
+        screenshotName = screenshotName + Constants.IMAGE_FORMAT;
+        return screenshotName;
+    }
+
+
     private Integer convertStringPriceToInteger(String price) {
         return Integer.parseInt(price.replace(Constants.UTIL_RUPEE, Constants.UTIL_EMPTY_QUOTE)
                 .replace(Constants.UTIL_COMMA, Constants.UTIL_EMPTY_QUOTE).trim());
@@ -132,8 +152,9 @@ public class PriceHistoryHelper {
     }
 
     private void takeAmazonProductScreenShot(WebDriver browser, String dept, String prodName) throws IOException {
+        String ssName = this.getScreenshotName(prodName, null);
         String folderPath = AmazonConstants.PATH_TO_SAVE_SS + dept + "\\";
-        String pathToSave = folderPath + prodName.substring(50) + "-" + System.currentTimeMillis();
+        String pathToSave = folderPath + ssName;
         fileHelper.saveAmazonSS(browser, pathToSave, folderPath);
     }
 
