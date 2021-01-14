@@ -16,6 +16,6 @@ public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
 
     PriceHistory findByProductNameAndCurrentPrice(String prodname, Integer currentPrice);
 
-    @Query(value = "select ph from amazonservice.price_history ph where created_date = CURRENT_DATE", nativeQuery = true)
+    @Query(value = "select * from amazonservice.price_history where created_date = CURRENT_DATE", nativeQuery = true)
     List<PriceHistory> getAllTodaysEntities();
 }

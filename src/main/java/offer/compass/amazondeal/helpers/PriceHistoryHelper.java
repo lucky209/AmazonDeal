@@ -73,17 +73,17 @@ public class PriceHistoryHelper {
             this.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
             //2.draw border on reviews box
             this.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REVIEW_ID);
-            //3.add an draw border on lowest element
+            //3.draw border on lowest and highest element
             this.drawBorderLowestAndHighestPriceElement(browser, lowestPrice, highestPrice);
-            //4.Now take SS
-            this.takeAmazonProductScreenShot(browser, todaysDealUrl.getDept(), prodName);
-            //5.shorten the url
+            //4.shorten the url
             String shortUrl = null;
             if (propertiesRepo.findByPropName(PropertyConstants.SHORTEN_URL).isEnabled())
                 shortUrl = this.getShortenUrl(url);
-            //6.save in DB
+            //5.save in DB
             this.saveInDB(lowestPrice, highestPrice, currentPrice, url,
                     "amazon", dropChances, prodName, true, shortUrl);
+            //6.Now take SS
+            this.takeAmazonProductScreenShot(browser, todaysDealUrl.getDept(), prodName);
         }
     }
 
@@ -211,7 +211,7 @@ public class PriceHistoryHelper {
         for (PriceHistory priceHistory : priceHistoryList) {
             output
                     .append(priceHistory.getProductName())
-                    .append("--")
+                    .append(" -- ")
                     .append(priceHistory.getShortUrl())
                     .append("\n");
         }
