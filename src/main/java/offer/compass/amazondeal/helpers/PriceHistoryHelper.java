@@ -4,22 +4,30 @@ import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.AmazonConstants;
 import offer.compass.amazondeal.constants.Constants;
 import offer.compass.amazondeal.constants.PriceHistoryConstants;
-import offer.compass.amazondeal.entities.PriceHistory;
-import offer.compass.amazondeal.entities.PriceHistoryRepo;
-import offer.compass.amazondeal.entities.TodaysDealUrl;
-import offer.compass.amazondeal.entities.TodaysDealUrlRepo;
+import offer.compass.amazondeal.constants.PropertyConstants;
+import offer.compass.amazondeal.entities.*;
+import offer.compass.amazondeal.models.BitlyRequest;
+import offer.compass.amazondeal.models.BitlyResponse;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 @Slf4j
 public class PriceHistoryHelper {
+
+    @Value("${bitly.access.token}")
+    private String accessToken;
 
     @Autowired
     private PriceHistoryRepo priceHistoryRepo;
@@ -27,6 +35,8 @@ public class PriceHistoryHelper {
     private TodaysDealUrlRepo todaysDealUrlRepo;
     @Autowired
     private FileHelper fileHelper;
+    @Autowired
+    private PropertiesRepo propertiesRepo;
 
     public void searchWithUrl(WebDriver browser, String url) throws InterruptedException {
         browser.get(PriceHistoryConstants.URL);
@@ -67,9 +77,13 @@ public class PriceHistoryHelper {
             this.drawBorderLowestAndHighestPriceElement(browser, lowestPrice, highestPrice);
             //4.Now take SS
             this.takeAmazonProductScreenShot(browser, todaysDealUrl.getDept(), prodName);
-            //5.save in DB
+            //5.shorten the url
+            String shortUrl = null;
+            if (propertiesRepo.findByPropName(PropertyConstants.SHORTEN_URL).isEnabled())
+                shortUrl = this.getShortenUrl(url);
+            //6.save in DB
             this.saveInDB(lowestPrice, highestPrice, currentPrice, url,
-                    "amazon", dropChances, prodName, true);
+                    "amazon", dropChances, prodName, true, shortUrl);
         }
     }
 
@@ -104,7 +118,7 @@ public class PriceHistoryHelper {
 
     private void saveInDB(Integer lowestPrice, Integer highestPrice,
                           Integer currentPrice, String url, String site,
-                          String dropChances, String prodName, boolean isGoodOffer) {
+                          String dropChances, String prodName, boolean isGoodOffer, String shortUrl) {
         PriceHistory priceHistory = new PriceHistory();
         priceHistory.setHighestPrice(highestPrice);
         priceHistory.setLowestPrice(lowestPrice);
@@ -114,6 +128,7 @@ public class PriceHistoryHelper {
         priceHistory.setDropChances(dropChances);
         priceHistory.setProductName(prodName);
         priceHistory.setGoodOffer(isGoodOffer);
+        priceHistory.setShortUrl(shortUrl);
         priceHistoryRepo.save(priceHistory);
     }
 
@@ -175,5 +190,31 @@ public class PriceHistoryHelper {
         } else {
             log.info("PRICE_HISTORY_REPLACE_DIV is not available for the product " + lowestPrice + " " + highestPrice);
         }
+    }
+
+    private String getShortenUrl(String longUrl) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "https://api-ssl.bitly.com/v4/shorten";
+        BitlyRequest bitlyRequest = new BitlyRequest();
+        bitlyRequest.setLongUrl(longUrl);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer "+ accessToken);
+        ResponseEntity<BitlyResponse> response = restTemplate.exchange(url,
+                HttpMethod.POST, new HttpEntity<>(bitlyRequest, headers), BitlyResponse.class);
+        return Objects.requireNonNull(response.getBody()).getLink();
+    }
+
+    public void getDescriptionString() {
+        List<PriceHistory> priceHistoryList = priceHistoryRepo.getAllTodaysEntities();
+        StringBuilder output = new StringBuilder();
+        for (PriceHistory priceHistory : priceHistoryList) {
+            output
+                    .append(priceHistory.getProductName())
+                    .append("--")
+                    .append(priceHistory.getShortUrl())
+                    .append("\n");
+        }
+        log.info("Description string is\n" + output);
     }
 }

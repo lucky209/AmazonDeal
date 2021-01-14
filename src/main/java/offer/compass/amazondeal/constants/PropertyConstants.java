@@ -16,4 +16,5 @@ public class PropertyConstants {
     public static final String RETAKE_SCREENSHOT_PATH = "retake.screenshot.image.path";
     public static final String DISCOUNT_PERCENTAGE = "discount.percentage";
     public static final String IMAGE_FORMAT = "image.format";
+    public static final String SHORTEN_URL = "shorten.url";
 }

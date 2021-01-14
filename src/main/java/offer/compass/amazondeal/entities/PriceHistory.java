@@ -23,6 +23,7 @@ public class PriceHistory {
     private Integer highestPrice;
     private Integer currentPrice;
     private boolean isGoodOffer;
+    private String shortUrl;
     @CreationTimestamp
     private LocalDateTime createdDate;
     @UpdateTimestamp
