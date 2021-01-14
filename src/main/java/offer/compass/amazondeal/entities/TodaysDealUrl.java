@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "todays_deal_url", schema = "amazonservice")
+@Table(name = "todays_deal_url")
 @Data
 public class TodaysDealUrl {
     @Id

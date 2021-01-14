@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -131,7 +130,7 @@ public class PriceHistoryHelper {
         } else {
             screenshotName = prodName;
         }
-        screenshotName = screenshotName.replace("\"", "");
+        screenshotName = screenshotName.replaceAll("[^\\w\\s]", "");
         screenshotName = screenshotName + "-" + System.currentTimeMillis();
         screenshotName = screenshotName + Constants.IMAGE_FORMAT;
         return screenshotName;

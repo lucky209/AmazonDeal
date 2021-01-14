@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +51,7 @@ public class AmazonServiceImpl implements AmazonService {
 
     @Override
     @Transactional
-    public boolean getUrlsByDepartment() throws Exception {
+    public boolean getUrlsByDepartment() {
         //delete last run records
         amazonDealHelper.deleteTodaysDealAllRecords();
         //initialize variables
@@ -67,8 +66,7 @@ public class AmazonServiceImpl implements AmazonService {
                     todaysDealUrlRepo), department);
             pool.execute(thread);
         }
-        pool.shutdown();
-        pool.awaitTermination(10, TimeUnit.HOURS);
+        this.shutdownAndAwaitTermination(pool);
         log.info("Completed the getUrlsByDepartment process...");
         log.info("Total today's deal urls are " + todaysDealUrlRepo.findAll().size());
         return true;
@@ -76,7 +74,7 @@ public class AmazonServiceImpl implements AmazonService {
 
     @Override
     @Transactional
-    public boolean getPriceHistoryByUrls() throws InterruptedException {
+    public boolean getPriceHistoryByUrls() {
         //get urls from todays deal table
         List<TodaysDealUrl> todaysDealUrlList = todaysDealUrlRepo.findAll();
         List<String> urls = todaysDealUrlList.stream().map(TodaysDealUrl::getUrl).collect(Collectors.toList());
@@ -91,13 +89,30 @@ public class AmazonServiceImpl implements AmazonService {
                         browserHelper, batchUrls, priceHistoryHelper);
                 pool.execute(thread);
             }
-            pool.shutdown();
-            pool.awaitTermination(10, TimeUnit.HOURS);
+            this.shutdownAndAwaitTermination(pool);
             log.info("Total today's deal processed urls " + PriceHistoryConstants.URLS_PROCESSED);
             PriceHistoryConstants.URLS_PROCESSED = 0;
             return true;
         }
         log.info("No urls found to get details");
         return false;
+    }
+
+    private void shutdownAndAwaitTermination(ExecutorService pool) {
+        pool.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+                pool.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+                    log.info("Pool did not terminate properly");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            pool.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
     }
 }
