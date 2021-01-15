@@ -57,7 +57,8 @@ public class AmazonServiceImpl implements AmazonService {
         //initialize variables
         int maxThreads = Integer.parseInt(propertiesRepo.findByPropName(PropertyConstants.POOL_SIZE).getPropValue());
         List<String> departments = amazonDealHelper.getScheduledDepartments().stream()
-                .map(ScheduledDepartment::getDept).collect(Collectors.toList());
+                .map(ScheduledDepartment::getDept).sorted((String::compareTo))
+                .collect(Collectors.toList());
         //limiting the threads
         ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
         for (String department : departments) {
