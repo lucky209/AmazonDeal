@@ -3,6 +3,7 @@ package offer.compass.amazondeal.schedulers;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.helpers.AmazonDealHelper;
 import offer.compass.amazondeal.services.AmazonServiceImpl;
+import offer.compass.amazondeal.services.PriceHistoryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,8 @@ public class TodaysDealScheduler {
     @Autowired
     private AmazonServiceImpl amazonService;
     @Autowired
+    private PriceHistoryServiceImpl priceHistoryService;
+    @Autowired
     private AmazonDealHelper amazonDealHelper;
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -27,7 +30,7 @@ public class TodaysDealScheduler {
         amazonService.getUrlsByDepartment();
         log.info("Get urls by departments are done successfully at " + LocalDateTime.now());
         //2.get price history details
-        amazonService.getPriceHistoryByUrls();
+        priceHistoryService.getPriceHistoryByUrls();
         log.info("Get price history urls are done successfully at " + LocalDateTime.now());
         log.info(":: Today's deal scheduler task is completed at " + LocalDateTime.now());
     }

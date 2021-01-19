@@ -3,15 +3,13 @@ package offer.compass.amazondeal.services;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.AmazonConstants;
-import offer.compass.amazondeal.constants.PriceHistoryConstants;
 import offer.compass.amazondeal.constants.PropertyConstants;
 import offer.compass.amazondeal.entities.*;
 import offer.compass.amazondeal.helpers.AmazonDealHelper;
+import offer.compass.amazondeal.helpers.AmazonDealOfTheDayHelper;
+import offer.compass.amazondeal.helpers.AmazonPrimeDealHelper;
 import offer.compass.amazondeal.helpers.BrowserHelper;
-import offer.compass.amazondeal.helpers.PriceHistoryHelper;
-import offer.compass.amazondeal.services.MultiThreading.GetPriceHistoryDetails;
-import offer.compass.amazondeal.services.MultiThreading.GetTodaysDealUrlsByDeptThread;
-import offer.compass.amazondeal.services.MultiThreading.GetUrlsByDeptTask;
+import offer.compass.amazondeal.services.MultiThreading.*;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +38,11 @@ public class AmazonServiceImpl implements AmazonService {
     @Autowired
     private AmazonDealHelper amazonDealHelper;
     @Autowired
-    private PriceHistoryHelper priceHistoryHelper;
+    private AmazonDealOfTheDayHelper dealOfTheDayHelper;
+    @Autowired
+    private DealOfTheDayRepo dealOfTheDayRepo;
+    @Autowired
+    private AmazonPrimeDealHelper primeDealHelper;
 
 
     @Override
@@ -75,32 +77,48 @@ public class AmazonServiceImpl implements AmazonService {
     }
 
     @Override
-    @Transactional
-    public boolean getPriceHistoryByUrls() throws InterruptedException {
-        //get urls from todays deal table
-        List<TodaysDealUrl> todaysDealUrlList = todaysDealUrlRepo.findAll();
-        List<String> urls = todaysDealUrlList.stream().map(TodaysDealUrl::getUrl).collect(Collectors.toList());
-        int searchPerPage = Integer.parseInt(propertiesRepo.findByPropName(
-                PropertyConstants.PRICE_HISTORY_SEARCH_PER_PAGE).getPropValue());
-        searchPerPage = Math.min(urls.size(), searchPerPage);
-        int maxThreads = amazonDealHelper.getMaxThreads(searchPerPage, urls.size());
-        if (urls.size() > 0) {
-            ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
-            for (List<String> batchUrls : Lists.partition(urls, searchPerPage)) {
-                Thread thread = new GetPriceHistoryDetails(
-                        browserHelper, batchUrls, priceHistoryHelper);
-                pool.execute(thread);
-            }
-            pool.shutdown();
-            pool.awaitTermination(10, TimeUnit.HOURS);
-            log.info("Completed the getPriceHistoryByUrls process...");
-            log.info("Total today's deal processed urls " + PriceHistoryConstants.URLS_PROCESSED);
-            PriceHistoryConstants.URLS_PROCESSED = 0;
-            priceHistoryHelper.getDescriptionString();
-            return true;
+    public boolean getDealOfTheDayUrls() throws Exception {
+        //delete last run records
+        amazonDealHelper.deleteDealOfTheDayAllRecords();
+        WebDriver browser = browserHelper.openBrowser(true, AmazonConstants.TODAYS_DEAL_URL);
+        //get total pages
+        int totalPages = dealOfTheDayHelper.getTotalPagesOfDOTDUrl(browser);
+        List<String> mainUrls = dealOfTheDayHelper.fetchDOTDUrls(browser, totalPages);
+        browser.quit();
+        //thread service
+        int maxThreads = Integer.parseInt(propertiesRepo.findByPropName(PropertyConstants.POOL_SIZE).getPropValue());
+        ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
+        for (List<String> partitionedUrls : Lists.partition(mainUrls, 10)) {
+            Thread thread = new GetDealOfTheDayUrls(partitionedUrls, dealOfTheDayHelper, browserHelper, dealOfTheDayRepo);
+            pool.execute(thread);
         }
-        log.info("No urls found to get details");
-        return false;
+        pool.shutdown();
+        pool.awaitTermination(10, TimeUnit.HOURS);
+        log.info("Completed the get urls from Deal of the day process...");
+        log.info("Total Deal of the urls are " + dealOfTheDayRepo.findAll().size());
+        return true;
+    }
+
+    @Override
+    public boolean getPrimeExclusiveUrls() throws InterruptedException {
+        //delete last prime records
+        primeDealHelper.deleteTodaysDealPrimeExclusiveRecords();
+        //initialize variables
+        int maxThreads = Integer.parseInt(propertiesRepo.findByPropName(PropertyConstants.POOL_SIZE).getPropValue());
+        List<String> departments = amazonDealHelper.getScheduledDepartments().stream()
+                .map(ScheduledDepartment::getDept).sorted((String::compareTo))
+                .collect(Collectors.toList());
+        //limiting the threads
+        ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
+        for (String department : departments) {
+            Thread thread = new GetPrimeUrlsByDeptTask(department, primeDealHelper);
+            pool.execute(thread);
+        }
+        pool.shutdown();
+        pool.awaitTermination(10, TimeUnit.HOURS);
+        log.info("Completed the get prime deals By Department process...");
+        log.info("Total today's deal urls are " + primeDealHelper.findAllPrimeDealUrls().size());
+        return true;
     }
 
 }

@@ -18,6 +18,7 @@ public class TodaysDealUrl {
     private String url;
     private String dept;
     private Integer price;
+    private Boolean prime;
     @CreationTimestamp
     private LocalDateTime createdDate;
     @UpdateTimestamp

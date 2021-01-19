@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.AmazonConstants;
 import offer.compass.amazondeal.constants.Constants;
 import offer.compass.amazondeal.constants.PropertyConstants;
-import offer.compass.amazondeal.entities.*;
+import offer.compass.amazondeal.entities.Department;
+import offer.compass.amazondeal.entities.DepartmentRepo;
+import offer.compass.amazondeal.entities.PropertiesRepo;
 import offer.compass.amazondeal.helpers.BrowserHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -12,7 +14,6 @@ import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class TodaysDealService {
     @Autowired
     private PropertiesRepo propertiesRepo;
 
-    private void clickNextButton(WebDriver browser) throws InterruptedException {
+    public void clickNextButton(WebDriver browser) throws InterruptedException {
         List<WebElement> webElementList = browser.findElements(
                 By.className(AmazonConstants.LAST_BUTTON_CLASS_NAME));
         if (webElementList.size() > 0) {
@@ -85,6 +86,50 @@ public class TodaysDealService {
         return urlsPriceMap;
     }
 
+    public List<String> getAllPagesPrimeUrls(WebDriver browser)
+            throws InterruptedException {
+        List<String> primeUrls = new ArrayList<>();
+        int lastPage = this.getTotalPageCount(browser);
+        int pageCount = 1;
+        while (pageCount <= lastPage) {
+            List<String> primeSinglePageUrls = this.getSinglePagePrimeUrls(browser);
+            primeUrls.addAll(primeSinglePageUrls);
+            this.clickNextButton(browser);
+            pageCount++;
+        }
+        return primeUrls;
+    }
+
+    private List<String> getSinglePagePrimeUrls(WebDriver browser) {
+        List<WebElement> prodList = browser.findElements(By.xpath(AmazonConstants.TODAYS_DEAL_PRODUCT_XPATH));
+        prodList = this.validatePrimeProductList(prodList);
+        List<String> primeUrls = new ArrayList<>();
+        prodList.forEach(product -> {
+            if (!product.findElements(By.id(AmazonConstants.TODAYS_DEAL_PRODUCT_LINK_ID)).isEmpty()) {
+                String url = product.findElement(By.id(AmazonConstants.TODAYS_DEAL_PRODUCT_LINK_ID))
+                        .getAttribute(Constants.ATTRIBUTE_HREF);
+                primeUrls.add(url);
+            }
+        });
+        return primeUrls;
+    }
+
+    private List<WebElement> validatePrimeProductList(List<WebElement> prodList) {
+        prodList = prodList.stream().filter(prod -> {
+            if (prod.getAttribute(Constants.VALIDATION_ATTRIBUTE_ID) != null) {
+                return prod.getAttribute(Constants.VALIDATION_ATTRIBUTE_ID).length() < 16;
+            }
+            return false;
+        }).collect(Collectors.toList());
+        return prodList.stream().filter(prod -> {
+            if (prod.getText() != null) {
+                return !prod.getText().contains(
+                        AmazonConstants.VALIDATION_UTIL_STRING_ADD_TO_CART);
+            }
+            return false;
+        }).collect(Collectors.toList());
+    }
+
     List<Department> loadDepartments(WebDriver browser) {
         int deptId = 1;
         WebElement webElement = browser.findElement(By.xpath(AmazonConstants.DEPARTMENTS_CONTAINER_XPATH));
@@ -133,7 +178,7 @@ public class TodaysDealService {
             browser.findElement(By.xpath(AmazonConstants.SEE_MORE_DEPT_XPATH)).click();
     }
 
-    private synchronized int getTotalPageCount(WebDriver browser) {
+    public synchronized int getTotalPageCount(WebDriver browser) {
         List<WebElement> elements = browser.findElements(By.cssSelector(AmazonConstants.PAGINATION_CSS_CLASS));
         int lastPage = 1;
         for (WebElement element : elements) {

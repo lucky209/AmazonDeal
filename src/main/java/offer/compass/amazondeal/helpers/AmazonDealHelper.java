@@ -22,6 +22,8 @@ public class AmazonDealHelper {
     private PriceHistoryRepo priceHistoryRepo;
     @Autowired
     private ScheduledDepartmentRepo scheduledDepartmentRepo;
+    @Autowired
+    private DealOfTheDayRepo dealOfTheDayRepo;
 
     public int getMaxThreads(int searchPerPage, int totalUrls) {
         if (totalUrls > searchPerPage)
@@ -48,5 +50,10 @@ public class AmazonDealHelper {
             priceHistoryRepo.deleteAllRecords();
             log.info("All price history urls are deleted...");
         }
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void deleteDealOfTheDayAllRecords() {
+        dealOfTheDayRepo.deleteAllRecords();
     }
 }
