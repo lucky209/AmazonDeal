@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.Constants;
 import offer.compass.amazondeal.entities.DealOfTheDay;
 import offer.compass.amazondeal.entities.DealOfTheDayRepo;
-import offer.compass.amazondeal.helpers.AmazonDealOfTheDayHelper;
 import offer.compass.amazondeal.helpers.BrowserHelper;
+import offer.compass.amazondeal.helpers.DOTDHelper;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -17,13 +17,13 @@ import java.util.stream.IntStream;
 @Slf4j
 public class GetDealOfTheDayUrls extends Thread {
     private List<String> mainUrls;
-    private AmazonDealOfTheDayHelper dealOfTheDayHelper;
+    private DOTDHelper dotdHelper;
     private BrowserHelper browserHelper;
     private DealOfTheDayRepo dealOfTheDayRepo;
 
-    public GetDealOfTheDayUrls(List<String> mainUrls, AmazonDealOfTheDayHelper dealOfTheDayHelper, BrowserHelper browserHelper, DealOfTheDayRepo dealOfTheDayRepo) {
+    public GetDealOfTheDayUrls(List<String> mainUrls, DOTDHelper dotdHelper, BrowserHelper browserHelper, DealOfTheDayRepo dealOfTheDayRepo) {
         this.mainUrls = mainUrls;
-        this.dealOfTheDayHelper = dealOfTheDayHelper;
+        this.dotdHelper = dotdHelper;
         this.browserHelper = browserHelper;
         this.dealOfTheDayRepo = dealOfTheDayRepo;
     }
@@ -39,8 +39,11 @@ public class GetDealOfTheDayUrls extends Thread {
         for (int i=0;i<tabs.size();i++) {
             browser.switchTo().window(tabs.get(i));
             browser.get(mainUrls.get(i));
-            Thread.sleep(2000);
-            List<DealOfTheDay> dealOfTheDayList = dealOfTheDayHelper.fetchSingleTabProductUrls(browser, false);
+        }
+
+        for (String tab : tabs) {
+            browser.switchTo().window(tab);
+            List<DealOfTheDay> dealOfTheDayList = dotdHelper.fetchDOTDEntitiesByMainUrl(browser, false);
             dealOfTheDayList.forEach(dealOfTheDay -> dealOfTheDayRepo.save(dealOfTheDay));
             log.info("Got {} entities in this tab. Saved entities so far is {}", dealOfTheDayList.size(), dealOfTheDayRepo.findAll().size());
         }

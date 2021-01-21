@@ -54,6 +54,6 @@ public class AmazonDealHelper {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteDealOfTheDayAllRecords() {
-        dealOfTheDayRepo.deleteAllRecords();
+        dealOfTheDayRepo.deleteAllNonPrimeRecords();
     }
 }

@@ -24,7 +24,7 @@ public class AmazonPrimeDealHelper {
     @Autowired
     private TodaysDealService todaysDealService;
     @Autowired
-    private AmazonDealOfTheDayHelper amazonDealOfTheDayHelper;
+    private DOTDHelper dotdHelper;
 
     public void saveDOTDEntity(DealOfTheDay dealOfTheDay) {
         dealOfTheDayRepo.save(dealOfTheDay);
@@ -51,8 +51,8 @@ public class AmazonPrimeDealHelper {
     }
 
     public List<DealOfTheDay> fetchSingleTabProductUrls(WebDriver browser, boolean isPrime) throws Exception {
-        return amazonDealOfTheDayHelper
-                .fetchSingleTabProductUrls(browser, isPrime);
+        return dotdHelper
+                .fetchDOTDEntitiesByMainUrl(browser, isPrime);
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)

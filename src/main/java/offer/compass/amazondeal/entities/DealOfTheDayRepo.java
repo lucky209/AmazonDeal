@@ -11,7 +11,7 @@ public interface DealOfTheDayRepo extends JpaRepository<DealOfTheDay, String> {
     @Transactional
     @Modifying
     @Query(value = "delete from amazonservice.deal_of_the_day where dept !='Prime'", nativeQuery = true)
-    void deleteAllRecords();
+    void deleteAllNonPrimeRecords();
 
     @Query(value = "select count(url) from amazonservice.deal_of_the_day where dept='Prime'", nativeQuery = true)
     int countOfPrimeDeals();

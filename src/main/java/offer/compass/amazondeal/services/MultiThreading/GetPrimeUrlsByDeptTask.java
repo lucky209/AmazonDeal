@@ -3,10 +3,7 @@ package offer.compass.amazondeal.services.MultiThreading;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.entities.DealOfTheDay;
-import offer.compass.amazondeal.entities.TodaysDealUrlRepo;
-import offer.compass.amazondeal.helpers.AmazonDealOfTheDayHelper;
 import offer.compass.amazondeal.helpers.AmazonPrimeDealHelper;
-import offer.compass.amazondeal.services.TodaysDealService;
 import org.openqa.selenium.WebDriver;
 
 import java.util.List;

@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.AmazonConstants;
 import offer.compass.amazondeal.constants.PropertyConstants;
 import offer.compass.amazondeal.entities.*;
-import offer.compass.amazondeal.helpers.AmazonDealHelper;
-import offer.compass.amazondeal.helpers.AmazonDealOfTheDayHelper;
-import offer.compass.amazondeal.helpers.AmazonPrimeDealHelper;
-import offer.compass.amazondeal.helpers.BrowserHelper;
+import offer.compass.amazondeal.helpers.*;
 import offer.compass.amazondeal.services.MultiThreading.*;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +35,11 @@ public class AmazonServiceImpl implements AmazonService {
     @Autowired
     private AmazonDealHelper amazonDealHelper;
     @Autowired
-    private AmazonDealOfTheDayHelper dealOfTheDayHelper;
-    @Autowired
     private DealOfTheDayRepo dealOfTheDayRepo;
     @Autowired
     private AmazonPrimeDealHelper primeDealHelper;
+    @Autowired
+    private DOTDHelper dotdHelper;
 
 
     @Override
@@ -82,14 +79,15 @@ public class AmazonServiceImpl implements AmazonService {
         amazonDealHelper.deleteDealOfTheDayAllRecords();
         WebDriver browser = browserHelper.openBrowser(true, AmazonConstants.TODAYS_DEAL_URL);
         //get total pages
-        int totalPages = dealOfTheDayHelper.getTotalPagesOfDOTDUrl(browser);
-        List<String> mainUrls = dealOfTheDayHelper.fetchDOTDUrls(browser, totalPages);
+        int totalPages = dotdHelper.getTotalPagesOfDOTDUrl(browser);
+        List<String> mainUrls = dotdHelper.fetchDOTDUrls(browser, totalPages);
+        log.info("Total main urls found " + mainUrls.size());
         browser.quit();
         //thread service
-        int maxThreads = Integer.parseInt(propertiesRepo.findByPropName(PropertyConstants.POOL_SIZE).getPropValue());
+        int maxThreads = Integer.parseInt(propertiesRepo.findByPropName(PropertyConstants.DOTD_POOL_SIZE).getPropValue());
         ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
-        for (List<String> partitionedUrls : Lists.partition(mainUrls, 10)) {
-            Thread thread = new GetDealOfTheDayUrls(partitionedUrls, dealOfTheDayHelper, browserHelper, dealOfTheDayRepo);
+        for (List<String> partitionedUrls : Lists.partition(mainUrls, 5)) {
+            Thread thread = new GetDealOfTheDayUrls(partitionedUrls, dotdHelper, browserHelper, dealOfTheDayRepo);
             pool.execute(thread);
         }
         pool.shutdown();
@@ -120,5 +118,4 @@ public class AmazonServiceImpl implements AmazonService {
         log.info("Total today's deal urls are " + primeDealHelper.findAllPrimeDealUrls().size());
         return true;
     }
-
 }
