@@ -12,4 +12,5 @@ public class PropertyConstants {
     public static final String REVIEW_THRESHOLD = "reviews.count.threshold";
     public static final String DISCOUNT_PERCENTAGE = "discount.percentage";
     public static final String SHORTEN_URL = "shorten.url";
+    public static final String DOTD_ENABLED = "dotd.enabled";
 }

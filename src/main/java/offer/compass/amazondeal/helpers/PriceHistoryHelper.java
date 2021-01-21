@@ -34,6 +34,8 @@ public class PriceHistoryHelper {
     @Autowired
     private TodaysDealUrlRepo todaysDealUrlRepo;
     @Autowired
+    private DealOfTheDayRepo dealOfTheDayRepo;
+    @Autowired
     private FileHelper fileHelper;
     @Autowired
     private PropertiesRepo propertiesRepo;
@@ -49,7 +51,7 @@ public class PriceHistoryHelper {
         Thread.sleep(1000);
     }
 
-    public void savePriceHistoryDetails(WebDriver browser, String url) throws IOException, InterruptedException {
+    public void savePriceHistoryDetails(WebDriver browser, String url, boolean isDOTDEnabled) throws IOException, InterruptedException {
         //get lowest price
         Integer lowestPrice = this.getLowestPrice(browser);
         //get highest price
@@ -59,8 +61,16 @@ public class PriceHistoryHelper {
         //get product name
         String prodName = this.getProductName(browser);
         //get current price
-        TodaysDealUrl todaysDealUrl = todaysDealUrlRepo.findByUrl(url);
-        Integer currentPrice = todaysDealUrl.getPrice();
+        Integer currentPrice;
+        DealOfTheDay dealOfTheDay = null;
+        TodaysDealUrl todaysDealUrl = null;
+        if (isDOTDEnabled) {
+            dealOfTheDay = dealOfTheDayRepo.findByUrl(url);
+            currentPrice = dealOfTheDay.getPrice();
+        } else {
+            todaysDealUrl = todaysDealUrlRepo.findByUrl(url);
+            currentPrice = todaysDealUrl.getPrice();
+        }
         //check good offer
         boolean isGoodOffer = this.isGoodOfferProduct(lowestPrice, highestPrice, currentPrice);
         //check existing product
@@ -83,8 +93,22 @@ public class PriceHistoryHelper {
             this.saveInDB(lowestPrice, highestPrice, currentPrice, url,
                     "amazon", dropChances, prodName, true, shortUrl);
             //6.Now take SS
-            this.takeAmazonProductScreenShot(browser, todaysDealUrl.getDept(), prodName);
+            String dept = this.getDepartment(isDOTDEnabled, todaysDealUrl, browser);
+            this.takeAmazonProductScreenShot(browser, dept , prodName);
         }
+    }
+
+    private String getDepartment(boolean isDOTDEnabled, TodaysDealUrl todaysDealUrl, WebDriver browser) {
+        if (isDOTDEnabled) {
+            boolean isEleAvail = !browser.findElements(By.cssSelector(PriceHistoryConstants.DEPT_CSS_CLASS)).isEmpty();
+            if (isEleAvail) {
+                return browser.findElement(By.cssSelector(PriceHistoryConstants.DEPT_CSS_CLASS))
+                        .findElement(By.tagName(Constants.TAG_LI)).getText().trim();
+            }
+        } else {
+            return todaysDealUrl.getDept();
+        }
+        return null;
     }
 
     private Integer getLowestPrice(WebDriver browser) {

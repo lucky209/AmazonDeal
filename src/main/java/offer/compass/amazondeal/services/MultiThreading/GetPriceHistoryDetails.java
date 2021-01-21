@@ -19,12 +19,14 @@ public class GetPriceHistoryDetails extends Thread {
     private BrowserHelper browserHelper;
     private List<String> batchUrls;
     private PriceHistoryHelper priceHistoryHelper;
+    private boolean isDOTDEnabled;
 
 
-    public GetPriceHistoryDetails(BrowserHelper browserHelper, List<String> batchUrls, PriceHistoryHelper priceHistoryHelper) {
+    public GetPriceHistoryDetails(BrowserHelper browserHelper, List<String> batchUrls, PriceHistoryHelper priceHistoryHelper, boolean isDOTDEnabled) {
         this.browserHelper = browserHelper;
         this.batchUrls = batchUrls;
         this.priceHistoryHelper = priceHistoryHelper;
+        this.isDOTDEnabled = isDOTDEnabled;
     }
 
     @Override
@@ -55,14 +57,14 @@ public class GetPriceHistoryDetails extends Thread {
         for (int i=0; i<tabs.size();i++) {
             browser.switchTo().window(tabs.get(i));
             try {
-                priceHistoryHelper.savePriceHistoryDetails(browser, batchUrls.get(i));
+                priceHistoryHelper.savePriceHistoryDetails(browser, batchUrls.get(i), isDOTDEnabled);
             } catch (Exception e) {
                 try {
                     log.info("Exception occurred. Exception is " + e.getMessage());
                     log.info("So retrying the from the start...");
                     //one time retry
                     priceHistoryHelper.searchWithUrl(browser, batchUrls.get(i));
-                    priceHistoryHelper.savePriceHistoryDetails(browser, batchUrls.get(i));
+                    priceHistoryHelper.savePriceHistoryDetails(browser, batchUrls.get(i), isDOTDEnabled);
                 } catch (Exception ex) {
                     log.info("Exception occurred again. Exception is " + ex.getMessage());
                     log.info("So continuing with next tab...");

@@ -4,9 +4,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.PriceHistoryConstants;
 import offer.compass.amazondeal.constants.PropertyConstants;
-import offer.compass.amazondeal.entities.PropertiesRepo;
-import offer.compass.amazondeal.entities.TodaysDealUrl;
-import offer.compass.amazondeal.entities.TodaysDealUrlRepo;
+import offer.compass.amazondeal.entities.*;
 import offer.compass.amazondeal.helpers.AmazonDealHelper;
 import offer.compass.amazondeal.helpers.BrowserHelper;
 import offer.compass.amazondeal.helpers.PriceHistoryHelper;
@@ -34,12 +32,21 @@ public class PriceHistoryServiceImpl implements PriceHistoryService {
     private BrowserHelper browserHelper;
     @Autowired
     private PriceHistoryHelper priceHistoryHelper;
+    @Autowired
+    private DealOfTheDayRepo dealOfTheDayRepo;
 
     @Override
     public boolean getPriceHistoryByUrls() throws InterruptedException {
-        //get urls from todays deal table
-        List<TodaysDealUrl> todaysDealUrlList = todaysDealUrlRepo.findAll();
-        List<String> urls = todaysDealUrlList.stream().map(TodaysDealUrl::getUrl).collect(Collectors.toList());
+        List<String> urls;
+        boolean isDOTDEnabled = propertiesRepo.findByPropName(PropertyConstants.DOTD_ENABLED).isEnabled();
+        if (isDOTDEnabled) {
+            //get urls from dotd table
+            urls = dealOfTheDayRepo.findAll().stream().map(DealOfTheDay::getUrl).collect(Collectors.toList());
+        } else {
+            //get urls from todays deal table
+            List<TodaysDealUrl> todaysDealUrlList = todaysDealUrlRepo.findAll();
+            urls = todaysDealUrlList.stream().map(TodaysDealUrl::getUrl).collect(Collectors.toList());
+        }
         int searchPerPage = Integer.parseInt(propertiesRepo.findByPropName(
                 PropertyConstants.PRICE_HISTORY_SEARCH_PER_PAGE).getPropValue());
         searchPerPage = Math.min(urls.size(), searchPerPage);
@@ -48,11 +55,11 @@ public class PriceHistoryServiceImpl implements PriceHistoryService {
             ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
             for (List<String> batchUrls : Lists.partition(urls, searchPerPage)) {
                 Thread thread = new GetPriceHistoryDetails(
-                        browserHelper, batchUrls, priceHistoryHelper);
+                        browserHelper, batchUrls, priceHistoryHelper, isDOTDEnabled);
                 pool.execute(thread);
             }
             pool.shutdown();
-            pool.awaitTermination(10, TimeUnit.HOURS);
+            pool.awaitTermination(5, TimeUnit.MINUTES);
             log.info("Completed the getPriceHistoryByUrls process...");
             log.info("Total today's deal processed urls " + PriceHistoryConstants.URLS_PROCESSED);
             PriceHistoryConstants.URLS_PROCESSED = 0;

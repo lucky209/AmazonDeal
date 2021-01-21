@@ -23,4 +23,6 @@ public interface DealOfTheDayRepo extends JpaRepository<DealOfTheDay, String> {
 
     @Query(value = "select * from amazonservice.deal_of_the_day dod where dod.dept='Prime'", nativeQuery = true)
     List<DealOfTheDay> findAllPrimeDealUrls();
+
+    DealOfTheDay findByUrl(String url);
 }

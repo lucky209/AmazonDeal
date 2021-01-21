@@ -8,7 +8,7 @@ public class Constants {
     public static final String TAG_ANCHOR = "a";
     public static final String TAG_I = "i";
     public static final String TAG_SPAN = "span";
-    public static final String TAG_H2 = "h2";
+    public static final String TAG_LI = "li";
     public static final String VALIDATION_ATTRIBUTE_ID = "id";
 
     public static final String UTIL_EMPTY_QUOTE = "";
