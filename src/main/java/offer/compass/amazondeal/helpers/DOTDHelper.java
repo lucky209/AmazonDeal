@@ -115,26 +115,28 @@ public class DOTDHelper {
     }
 
     private void clickMainUrlNextPage(WebDriver browser) throws InterruptedException {
-        boolean isNextButtonAvail = !browser.findElements(By.id("pagnNextString")).isEmpty();
+        boolean isNextButtonAvail = !browser.findElements(By.id(AmazonConstants.PAGINATION_NEXT_BUTTON_ID)).isEmpty();
         if (!isNextButtonAvail) {
             todaysDealService.clickNextButton(browser);
         } else {
-            browser.findElement(By.id("pagnNextString")).click();
+            browser.findElement(By.id(AmazonConstants.PAGINATION_NEXT_BUTTON_ID)).click();
         }
     }
 
     private void clickSeeAllResults(WebDriver browser) throws InterruptedException {
-        boolean isSeeAllResultsAvail = !browser.findElements(By.cssSelector(".a-size-medium.a-color-link.a-text-bold")).isEmpty();
+        boolean isSeeAllResultsAvail = !browser.findElements(By.cssSelector(DOTDConstants.SEE_ALL_RESULTS_CSS_CLASS)).isEmpty();
         if (isSeeAllResultsAvail) {
-            browser.findElement(By.cssSelector(".a-size-medium.a-color-link.a-text-bold")).click();
+            browser.findElement(By.cssSelector(DOTDConstants.SEE_ALL_RESULTS_CSS_CLASS)).click();
             Thread.sleep(2000);
         }
     }
 
-    public int getTotalPagesOfMainUrl(WebDriver browser) {
-        boolean lastPage = !browser.findElements(By.className("pagnDisabled")).isEmpty();
+    private int getTotalPagesOfMainUrl(WebDriver browser) {
+        boolean lastPage = !browser.findElements(By.className(
+                AmazonConstants.PAGINATION_DISABLED_CLASS)).isEmpty();
         if (lastPage) {
-            String lastPageStr = browser.findElement(By.className("pagnDisabled")).getText().trim();
+            String lastPageStr = browser.findElement(By.className(
+                    AmazonConstants.PAGINATION_DISABLED_CLASS)).getText().trim();
             log.info("total pages " + lastPageStr);
             return Integer.parseInt(lastPageStr);
         } else {
@@ -150,9 +152,8 @@ public class DOTDHelper {
         return entities;
     }
 
-    private List<DealOfTheDay> fetchType5Entities(WebDriver browser, boolean isPrime) {
-        List<DealOfTheDay> entities = new ArrayList<>();
-        return entities;
+    private List<DealOfTheDay> fetchType5Entities(WebDriver browser, boolean isPrime) throws Exception {
+        throw new Exception("Type 5 not developed yet. Current url is " + browser.getCurrentUrl());
     }
 
     private List<DealOfTheDay> fetchType4Entities(WebDriver browser, boolean isPrime, boolean isRatingStarClicked) throws Exception {
@@ -315,7 +316,7 @@ public class DOTDHelper {
             if (isEleAvail) {
                 String hrefAttr = element.findElement(By.cssSelector(DOTDConstants.TYPE_2_REVIEW_CSS_CLASS))
                         .getAttribute(Constants.ATTRIBUTE_HREF);
-                if (hrefAttr.contains("productPromotions")) {
+                if (hrefAttr.contains(DOTDConstants.PRODUCT_PROMOTIONS_UTIL_STRING)) {
                     unwantedElements.add(element);
                     continue;
                 }
@@ -356,7 +357,8 @@ public class DOTDHelper {
                 List<WebElement> anchorElements = element.findElements(By.tagName(Constants.TAG_ANCHOR));
                 int anchorCount = 1;
                 for (WebElement anchorElement : anchorElements) {
-                    if (anchorElement.getAttribute(Constants.ATTRIBUTE_HREF).contains("customerReviews")) {
+                    if (anchorElement.getAttribute(Constants.ATTRIBUTE_HREF).contains(
+                            DOTDConstants.CUSTOMER_REVIEWS_UTIL_STRING)) {
                         int ratingCount = Integer.parseInt(anchorElement.getText()
                                 .replace(Constants.UTIL_COMMA, Constants.UTIL_EMPTY_QUOTE).trim());
                         if (ratingCount < 50) {
@@ -398,7 +400,7 @@ public class DOTDHelper {
                     By.xpath(DOTDConstants.TYPE_4_REVIEW_STAR_XPATH)).isEmpty();
             if (isReviewEleAvail) {
                 String star = element.findElement(By.xpath(
-                        DOTDConstants.TYPE_4_REVIEW_STAR_XPATH)).getAttribute("class");
+                        DOTDConstants.TYPE_4_REVIEW_STAR_XPATH)).getAttribute(Constants.ATTRIBUTE_CLASS);
                 star = CharMatcher.inRange('0', '9').retainFrom(star);
                 if (!(star.equals("4") || star.equals("45") || star.equals("5"))) {
                     unwantedElements.add(element);
@@ -422,7 +424,7 @@ public class DOTDHelper {
                 if (isReviewEleAvail) {
                     String star = element
                             .findElement(By.cssSelector(DOTDConstants.TYPE_3_REVIEW_CSS_CLASS))
-                            .findElement(By.tagName(Constants.TAG_I)).getAttribute("class");
+                            .findElement(By.tagName(Constants.TAG_I)).getAttribute(Constants.ATTRIBUTE_CLASS);
                     star = CharMatcher.inRange('0', '9').retainFrom(star);
                     if (!(star.equals("4") || star.equals("45") || star.equals("5"))) {
                         unwantedElements.add(element);
@@ -438,17 +440,18 @@ public class DOTDHelper {
     }
 
     private boolean clickRatingStar(WebDriver browser) throws InterruptedException {
-        boolean isEleAvail = !browser.findElements(By.id("reviewsRefinements")).isEmpty();
-        boolean isEleAvailByIconXpath = !browser.findElements(By.xpath("//*[@id=\"leftNav\"]/ul[7]/div/li[1]")).isEmpty();
+        boolean isEleAvail = !browser.findElements(By.id(DOTDConstants.RATING_STAR_ID)).isEmpty();
+        boolean isEleAvailByIconXpath = !browser.findElements(By.xpath(DOTDConstants.RATING_STAR_XPATH)).isEmpty();
         if (isEleAvail) {
-            List<WebElement> liList = browser.findElement(By.id("reviewsRefinements")).findElements(By.tagName("li"));
+            List<WebElement> liList = browser.findElement(By.id(DOTDConstants.RATING_STAR_ID))
+                    .findElements(By.tagName(Constants.TAG_LI));
             if (liList.size() > 0) {
                 liList.get(0).click();
                 Thread.sleep(2000);
                 return true;
             }
         } else if (isEleAvailByIconXpath) {
-            browser.findElement(By.xpath("//*[@id=\"leftNav\"]/ul[7]/div/li[1]")).click();
+            browser.findElement(By.xpath(DOTDConstants.RATING_STAR_XPATH)).click();
             Thread.sleep(2000);
             return true;
         }

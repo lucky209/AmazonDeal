@@ -29,6 +29,8 @@ public class AmazonConstants {
     public static final String DOTD_NEXT_BUTTON_DIV_ID = "nextShovlButton";
 
     public static final String PAGINATION_CSS_CLASS = ".a-pagination";
+    public static final String PAGINATION_NEXT_BUTTON_ID = "pagnNextString";
+    public static final String PAGINATION_DISABLED_CLASS = "pagnDisabled";
     public static final String PAGINATION_DOTS = "...";
     public static final String PAGINATION_PREV = "←Previous";
     public static final String PAGINATION_NEXT = "Next→";

@@ -31,21 +31,37 @@ public class GetDealOfTheDayUrls extends Thread {
     @SneakyThrows
     @Override
     public void run() {
+        //open tabs
         WebDriver browser = browserHelper.openBrowser(true);
         IntStream.range(1,mainUrls.size()).forEach(count -> ((JavascriptExecutor) browser)
                 .executeScript(Constants.NEW_TAB_SCRIPT));
         log.info("Opened {} tabs", mainUrls.size());
+        //get urls
         List<String> tabs = new ArrayList<>(browser.getWindowHandles());
         for (int i=0;i<tabs.size();i++) {
             browser.switchTo().window(tabs.get(i));
             browser.get(mainUrls.get(i));
         }
-
+        //process urls
         for (String tab : tabs) {
+            List<DealOfTheDay> dealOfTheDayList;
             browser.switchTo().window(tab);
-            List<DealOfTheDay> dealOfTheDayList = dotdHelper.fetchDOTDEntitiesByMainUrl(browser, false);
+            try {
+                dealOfTheDayList = dotdHelper.fetchDOTDEntitiesByMainUrl(browser, false);
+            } catch (Exception ex) {
+                log.info("Exception occurred for the url " + browser.getCurrentUrl());
+                log.info("Retrying again");
+                try {
+                    browser.get(browser.getCurrentUrl());
+                    dealOfTheDayList = dotdHelper.fetchDOTDEntitiesByMainUrl(browser, false);
+                } catch (Exception e) {
+                    log.info("Exception occurred again. Moving to next tab");
+                    continue;
+                }
+            }
             dealOfTheDayList.forEach(dealOfTheDay -> dealOfTheDayRepo.save(dealOfTheDay));
-            log.info("Got {} entities in this tab. Saved entities so far is {}", dealOfTheDayList.size(), dealOfTheDayRepo.findAll().size());
+            log.info("Got {} entities in this tab. Saved entities so far is {}",
+                    dealOfTheDayList.size(), dealOfTheDayRepo.findAll().size());
         }
         log.info("Quitting the browser...");
         browser.quit();

@@ -23,4 +23,10 @@ public class DOTDConstants {
     public static final String TYPE_4_REVIEW_STAR_XPATH = "//*[starts-with(@class,'a-icon a-icon-star-small a-star-small-')]";
 
     public static final String TYPE_5_MAIN_PRODUCT_CSS_CLASS = ".a-column.a-span12.aok-float-right.apb-browse-col-pad-left.apb-browse-two-col-center-margin-right";
+
+    public static final String SEE_ALL_RESULTS_CSS_CLASS = ".a-size-medium.a-color-link.a-text-bold";
+    public static final String PRODUCT_PROMOTIONS_UTIL_STRING = "productPromotions";
+    public static final String CUSTOMER_REVIEWS_UTIL_STRING = "customerReviews";
+    public static final String RATING_STAR_ID = "reviewsRefinements";
+    public static final String RATING_STAR_XPATH = "//*[@id=\"leftNav\"]/ul[7]/div/li[1]";
 }
