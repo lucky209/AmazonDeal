@@ -120,18 +120,19 @@ public class DOTDHelper {
             todaysDealService.clickNextButton(browser);
         } else {
             browser.findElement(By.id(AmazonConstants.PAGINATION_NEXT_BUTTON_ID)).click();
+            Thread.sleep(3000);
         }
     }
 
-    private void clickSeeAllResults(WebDriver browser) throws InterruptedException {
+    private synchronized void clickSeeAllResults(WebDriver browser) throws InterruptedException {
         boolean isSeeAllResultsAvail = !browser.findElements(By.cssSelector(DOTDConstants.SEE_ALL_RESULTS_CSS_CLASS)).isEmpty();
         if (isSeeAllResultsAvail) {
             browser.findElement(By.cssSelector(DOTDConstants.SEE_ALL_RESULTS_CSS_CLASS)).click();
-            Thread.sleep(2000);
+            Thread.sleep(3000);
         }
     }
 
-    private int getTotalPagesOfMainUrl(WebDriver browser) {
+    private synchronized int getTotalPagesOfMainUrl(WebDriver browser) {
         boolean lastPage = !browser.findElements(By.className(
                 AmazonConstants.PAGINATION_DISABLED_CLASS)).isEmpty();
         if (lastPage) {
@@ -439,7 +440,7 @@ public class DOTDHelper {
         productElements.removeAll(unwantedElements);
     }
 
-    private boolean clickRatingStar(WebDriver browser) throws InterruptedException {
+    private synchronized boolean clickRatingStar(WebDriver browser) throws InterruptedException {
         boolean isEleAvail = !browser.findElements(By.id(DOTDConstants.RATING_STAR_ID)).isEmpty();
         boolean isEleAvailByIconXpath = !browser.findElements(By.xpath(DOTDConstants.RATING_STAR_XPATH)).isEmpty();
         if (isEleAvail) {
@@ -447,12 +448,12 @@ public class DOTDHelper {
                     .findElements(By.tagName(Constants.TAG_LI));
             if (liList.size() > 0) {
                 liList.get(0).click();
-                Thread.sleep(2000);
+                Thread.sleep(3000);
                 return true;
             }
         } else if (isEleAvailByIconXpath) {
             browser.findElement(By.xpath(DOTDConstants.RATING_STAR_XPATH)).click();
-            Thread.sleep(2000);
+            Thread.sleep(3000);
             return true;
         }
         return false;
@@ -482,7 +483,7 @@ public class DOTDHelper {
         return dealOfTheDay;
     }
 
-    private DOTDTypeEnum fetchTypeOfMainUrl(WebDriver browser) {
+    private synchronized DOTDTypeEnum fetchTypeOfMainUrl(WebDriver browser) {
         if (!browser.findElements(By.id(DOTDConstants.TYPE_1_MAIN_PRODUCT_ID)).isEmpty()) {
             return DOTDTypeEnum.TYPE_1;
         } else if (!browser.findElements(By.id(DOTDConstants.TYPE_2_MAIN_PRODUCT_ID)).isEmpty()) {

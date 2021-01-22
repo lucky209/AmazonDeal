@@ -41,13 +41,6 @@ public class AmazonServiceImpl implements AmazonService {
     @Autowired
     private DOTDHelper dotdHelper;
 
-
-    @Override
-    public List<Department> loadDepartments() throws InterruptedException {
-        WebDriver browser = browserHelper.openBrowser(false, AmazonConstants.TODAYS_DEAL_URL);
-        return todaysDealService.loadDepartments(browser);
-    }
-
     @Override
     @Transactional
     public boolean getUrlsByDepartment() throws InterruptedException {

@@ -11,11 +11,9 @@ import java.time.LocalDate;
 @Entity
 @Data
 public class ScheduledDepartment {
-    @Id
-    private int id;
     private int dayNo;
     private String dayName;
-    private String category;
+    @Id
     private String dept;
     private boolean enabled;
     @CreationTimestamp

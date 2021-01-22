@@ -54,16 +54,11 @@ public class GetUrlsByDeptTask {
     }
 
     private void saveTodaysDealUrls(String url, Integer price, String department) {
-        TodaysDealUrl existingRecord = todaysDealUrlRepo.findByUrl(url);
-        if (existingRecord == null) {
-            TodaysDealUrl todaysDealUrl = new TodaysDealUrl();
-            todaysDealUrl.setUrl(url);
-            todaysDealUrl.setDept(department);
-            todaysDealUrl.setPrice(price);
-            todaysDealUrlRepo.save(todaysDealUrl);
-        } else {
-            log.info("Existing record found " + existingRecord.toString());
-        }
+        TodaysDealUrl todaysDealUrl = new TodaysDealUrl();
+        todaysDealUrl.setUrl(url);
+        todaysDealUrl.setDept(department);
+        todaysDealUrl.setPrice(price);
+        todaysDealUrlRepo.save(todaysDealUrl);
     }
 
     public void tearDown() {

@@ -42,10 +42,12 @@ public class PriceHistoryServiceImpl implements PriceHistoryService {
         if (isDOTDEnabled) {
             //get urls from dotd table
             urls = dealOfTheDayRepo.findAll().stream().map(DealOfTheDay::getUrl).collect(Collectors.toList());
+            log.info("Fetched {} urls from the DOTD table", urls.size());
         } else {
             //get urls from todays deal table
             List<TodaysDealUrl> todaysDealUrlList = todaysDealUrlRepo.findAll();
             urls = todaysDealUrlList.stream().map(TodaysDealUrl::getUrl).collect(Collectors.toList());
+            log.info("Fetched {} urls from the Today's deal table", urls.size());
         }
         int searchPerPage = Integer.parseInt(propertiesRepo.findByPropName(
                 PropertyConstants.PRICE_HISTORY_SEARCH_PER_PAGE).getPropValue());
@@ -59,7 +61,7 @@ public class PriceHistoryServiceImpl implements PriceHistoryService {
                 pool.execute(thread);
             }
             pool.shutdown();
-            pool.awaitTermination(5, TimeUnit.MINUTES);
+            pool.awaitTermination(5, TimeUnit.HOURS);
             log.info("Completed the getPriceHistoryByUrls process...");
             log.info("Total today's deal processed urls " + PriceHistoryConstants.URLS_PROCESSED);
             PriceHistoryConstants.URLS_PROCESSED = 0;

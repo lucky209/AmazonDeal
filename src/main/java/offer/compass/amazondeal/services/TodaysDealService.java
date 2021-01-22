@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.AmazonConstants;
 import offer.compass.amazondeal.constants.Constants;
 import offer.compass.amazondeal.constants.PropertyConstants;
-import offer.compass.amazondeal.entities.Department;
-import offer.compass.amazondeal.entities.DepartmentRepo;
 import offer.compass.amazondeal.entities.PropertiesRepo;
 import offer.compass.amazondeal.helpers.BrowserHelper;
 import org.openqa.selenium.By;
@@ -14,7 +12,6 @@ import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +24,6 @@ public class TodaysDealService {
 
     @Autowired
     private BrowserHelper browserHelper;
-    @Autowired
-    private DepartmentRepo departmentRepo;
     @Autowired
     private PropertiesRepo propertiesRepo;
 
@@ -128,29 +123,6 @@ public class TodaysDealService {
             }
             return false;
         }).collect(Collectors.toList());
-    }
-
-    List<Department> loadDepartments(WebDriver browser) {
-        int deptId = 1;
-        WebElement webElement = browser.findElement(By.xpath(AmazonConstants.DEPARTMENTS_CONTAINER_XPATH));
-        this.clickSeeMoreDept(browser);
-        List<WebElement> elements = webElement.findElements(By.cssSelector(AmazonConstants.DEPARTMENTS_CSS_CLASS));
-        for (WebElement element : elements) {
-            this.saveDepartment(element, deptId);
-            deptId++;
-        }
-        log.info("::: Response is fetched, quitting the browser.");
-        browser.quit();
-        return departmentRepo.findAll();
-    }
-
-    private void saveDepartment(WebElement element, int deptId) {
-        Department department = new Department();
-        department.setId(deptId);
-        department.setDeptName(element.getText().trim());
-        department.setEnabled(true);
-        department.setCreatedDate(LocalDate.now().toString());
-        departmentRepo.save(department);
     }
 
     public synchronized boolean findAndClickSingleDepartment(WebDriver browser, String deptName) throws InterruptedException {

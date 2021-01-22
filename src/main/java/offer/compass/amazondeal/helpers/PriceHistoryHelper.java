@@ -102,7 +102,7 @@ public class PriceHistoryHelper {
         if (isDOTDEnabled) {
             boolean isEleAvail = !browser.findElements(By.cssSelector(PriceHistoryConstants.DEPT_CSS_CLASS)).isEmpty();
             if (isEleAvail) {
-                return browser.findElement(By.cssSelector(PriceHistoryConstants.DEPT_CSS_CLASS))
+                return "DOTD-" + browser.findElement(By.cssSelector(PriceHistoryConstants.DEPT_CSS_CLASS))
                         .findElement(By.tagName(Constants.TAG_LI)).getText().trim();
             }
         } else {
@@ -169,7 +169,7 @@ public class PriceHistoryHelper {
         } else {
             screenshotName = prodName;
         }
-        screenshotName = screenshotName.replaceAll("[^\\w\\s]", "");
+        screenshotName = screenshotName.replaceAll("[^\\w\\s]", Constants.UTIL_EMPTY_QUOTE);
         screenshotName = screenshotName + "-" + System.currentTimeMillis();
         screenshotName = screenshotName + Constants.IMAGE_FORMAT;
         return screenshotName;
