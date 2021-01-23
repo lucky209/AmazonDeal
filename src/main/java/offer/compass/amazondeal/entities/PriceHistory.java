@@ -4,8 +4,10 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -20,9 +22,10 @@ public class PriceHistory {
     private Integer highestPrice;
     private Integer currentPrice;
     private boolean isGoodOffer;
+    private boolean isDotd;
     private String shortUrl;
     @CreationTimestamp
-    private LocalDateTime createdDate;
+    private LocalDate createdDate;
     @UpdateTimestamp
-    private LocalDateTime updatedDate;
+    private LocalDate updatedDate;
 }

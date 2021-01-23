@@ -9,7 +9,6 @@ public class AmazonConstants {
     public static final String TODAYS_DEAL_REVIEW_ID = "averageCustomerReviews_feature_div";
     public static final String TODAYS_DEAL_PRODUCT_XPATH = "//*[starts-with(@id,'100_dealView_')]";
     public static final String TODAYS_DEAL_PRICE_CSS_CLASS = ".gb-font-size-medium.inlineBlock.unitLineHeight.dealPriceText";
-    public static final String DEPARTMENTS_CONTAINER_XPATH = "//*[@id=\"widgetFilters\"]/div[1]/div[2]";
     public static final String SEE_MORE_DEPT_XPATH = "//*[@id=\"widgetFilters\"]/div[1]/div[2]/a/span";
     public static final String DEPARTMENTS_CSS_CLASS = ".a-label.a-checkbox-label";
     public static final String FILTER_CSS_CLASS = ".a-row.a-spacing-small.filterItem";

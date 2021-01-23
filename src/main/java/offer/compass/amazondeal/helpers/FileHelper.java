@@ -22,7 +22,7 @@ public class FileHelper {
     private void createNewDirectory(String folderPath) {
         File file = new File(folderPath);
         if (!file.exists()) {
-            boolean isCreated = file.mkdir();
+            boolean isCreated = file.mkdirs();
             if (isCreated)
                 log.info("New folder created, path is " + folderPath);
         }

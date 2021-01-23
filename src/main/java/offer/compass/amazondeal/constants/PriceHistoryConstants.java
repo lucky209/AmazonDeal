@@ -14,4 +14,5 @@ public class PriceHistoryConstants {
     public static final String PRICE_HISTORY_DIV = "pricehistory";
     public static final String DEPT_CSS_CLASS = ".a-unordered-list.a-horizontal.a-size-small";
     public static int URLS_PROCESSED = 0;
+    public static int SCREENSHOT_PROCESSED = 0;
 }

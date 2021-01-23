@@ -7,4 +7,6 @@ public interface AmazonService {
     boolean getDealOfTheDayUrls() throws Exception;
 
     boolean getPrimeExclusiveUrls() throws InterruptedException;
+
+    boolean takeScreenshotOfSelectedDeals() throws InterruptedException;
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
@@ -18,4 +19,6 @@ public interface PriceHistoryRepo extends JpaRepository<PriceHistory, Integer> {
 
     @Query(value = "select * from amazonservice.price_history where created_date = CURRENT_DATE", nativeQuery = true)
     List<PriceHistory> getAllTodaysEntities();
+
+    List<PriceHistory> findByCreatedDate(LocalDate date);
 }

@@ -3,6 +3,7 @@ package offer.compass.amazondeal.services;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.amazondeal.constants.AmazonConstants;
+import offer.compass.amazondeal.constants.PriceHistoryConstants;
 import offer.compass.amazondeal.constants.PropertyConstants;
 import offer.compass.amazondeal.entities.*;
 import offer.compass.amazondeal.helpers.*;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,6 +42,10 @@ public class AmazonServiceImpl implements AmazonService {
     private AmazonPrimeDealHelper primeDealHelper;
     @Autowired
     private DOTDHelper dotdHelper;
+    @Autowired
+    private PriceHistoryRepo priceHistoryRepo;
+    @Autowired
+    private PriceHistoryHelper priceHistoryHelper;
 
     @Override
     @Transactional
@@ -109,6 +115,24 @@ public class AmazonServiceImpl implements AmazonService {
         pool.awaitTermination(10, TimeUnit.HOURS);
         log.info("Completed the get prime deals By Department process...");
         log.info("Total today's deal urls are " + primeDealHelper.findAllPrimeDealUrls().size());
+        return true;
+    }
+
+    @Override
+    public boolean takeScreenshotOfSelectedDeals() throws InterruptedException {
+        List<PriceHistory> priceHistoryList = priceHistoryRepo.findByCreatedDate(LocalDate.now());
+        int maxThreads = Integer.parseInt(propertiesRepo.findByPropName(
+                PropertyConstants.PRICE_HISTORY_POOL_SIZE).getPropValue());
+        //limiting the threads
+        ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
+        for (List<PriceHistory> portionPH : Lists.partition(priceHistoryList, 10)) {
+            Thread thread = new PriceHistoryScreenshot(portionPH, browserHelper, priceHistoryHelper);
+            pool.execute(thread);
+        }
+        pool.shutdown();
+        pool.awaitTermination(10, TimeUnit.HOURS);
+        PriceHistoryConstants.SCREENSHOT_PROCESSED = 0;
+        log.info("Completed the screenshot process...");
         return true;
     }
 }

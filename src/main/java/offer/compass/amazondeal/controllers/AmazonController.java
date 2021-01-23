@@ -39,4 +39,11 @@ public class AmazonController {
         log.info("::: Request received to get deal of the day urls");
         return amazonService.getPrimeExclusiveUrls();
     }
+
+    @GetMapping("/screenshot/selected-ph-deals")
+    public boolean takeScreenshotOfSelectedDeals() throws Exception {
+        log.info("::: Request received to get deal of the day urls");
+        return amazonService.takeScreenshotOfSelectedDeals();
+    }
+
 }
