@@ -36,18 +36,13 @@ public class BrowserHelper {
         return browser.findElements(By.xpath(xpath));
     }
 
-    public void switchToTab(WebDriver browser, String tab) {
-        browser.switchTo().window(tab);
-    }
-
     private WebDriver openChromeBrowser(boolean isMaximize) {
         ChromeOptions chromeOptions = new ChromeOptions();
         if (isMaximize)
-        chromeOptions.addArguments("window-size=1355,725");
+            chromeOptions.addArguments("window-size=1358,727");
         chromeOptions.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
         chromeOptions.setHeadless(propertiesRepo.findByPropName(PropertyConstants.HEADLESS_MODE).isEnabled());
-        chromeOptions.setUnhandledPromptBehaviour(UnexpectedAlertBehaviour.ACCEPT);
         WebDriverManager.chromedriver().setup();
         return new ChromeDriver(chromeOptions);
     }

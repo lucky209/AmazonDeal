@@ -46,25 +46,15 @@ public class PriceHistoryScreenshot extends Thread {
             browser.get(priceHistoryList.get(i).getUrl());
             Thread.sleep(1000);
         }
-        //draw border id on regular price box
-        for (String tab : tabs) {
-            browser.switchTo().window(tab);
-            priceHistoryHelper.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
-            Thread.sleep(1000);
-        }
-        //draw border id on reviews box
-        for (String tab : tabs) {
-            browser.switchTo().window(tab);
-            priceHistoryHelper.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REVIEW_ID);
-            Thread.sleep(1000);
-        }
-        //draw border id on lowest and highest element
+        //draw borders
         for (int i=0;i<tabs.size();i++) {
             PriceHistory priceHistory = priceHistoryList.get(i);
             browser.switchTo().window(tabs.get(i));
+            priceHistoryHelper.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
+            priceHistoryHelper.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REVIEW_ID);
             priceHistoryHelper.drawBorderLowestAndHighestPriceElement(browser,
                     priceHistory.getLowestPrice(), priceHistory.getHighestPrice());
-            Thread.sleep(1000);
+            Thread.sleep(250);
         }
         //process urls
         for (int i=0;i<tabs.size();i++) {
@@ -75,7 +65,7 @@ public class PriceHistoryScreenshot extends Thread {
                 String dept = this.getDepartment(browser, priceHistory.isDotd());
                 priceHistoryHelper.takeAmazonProductScreenShot(browser, dept ,
                         priceHistory.getProductName());
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (Exception ex) {
                 log.info("Exception occurred for the url " + browser.getCurrentUrl());
                 //todo create exception handling

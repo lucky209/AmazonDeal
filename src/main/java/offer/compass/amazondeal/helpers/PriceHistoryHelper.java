@@ -53,7 +53,7 @@ public class PriceHistoryHelper {
         Thread.sleep(1000);
     }
 
-    public void savePriceHistoryDetails(WebDriver browser, String url, boolean isDOTDEnabled) throws IOException, InterruptedException {
+    public void savePriceHistoryDetails(WebDriver browser, String url, boolean isDOTDEnabled) {
         //get lowest price
         Integer lowestPrice = this.getLowestPrice(browser);
         //get highest price
@@ -168,7 +168,7 @@ public class PriceHistoryHelper {
         }
     }
 
-    public void takeAmazonProductScreenShot(WebDriver browser, String dept, String prodName) throws IOException {
+    public synchronized void takeAmazonProductScreenShot(WebDriver browser, String dept, String prodName) throws IOException {
         String ssName = this.getScreenshotName(prodName, null);
         String folderPath = AmazonConstants.PATH_TO_SAVE_SS + dept + "\\";
         String pathToSave = folderPath + ssName;
@@ -181,15 +181,20 @@ public class PriceHistoryHelper {
     }
 
     public void drawBorderLowestAndHighestPriceElement(WebDriver browser, int lowestPrice, int highestPrice) {
-        boolean isElementAvailable = !browser.findElements(By.id(PriceHistoryConstants.PRICE_HISTORY_REPLACE_DIV)).isEmpty();
+
+        boolean isElementAvailable = !browser.findElements(By.id(PriceHistoryConstants.PRICE_HISTORY_REPLACE_DIV_ID)).isEmpty();
         if (isElementAvailable) {
-            WebElement element = browser.findElement(By.id(PriceHistoryConstants.PRICE_HISTORY_REPLACE_DIV));
+            WebElement element = browser.findElement(By.id(PriceHistoryConstants.PRICE_HISTORY_REPLACE_DIV_ID));
             JavascriptExecutor jse = (JavascriptExecutor)browser;
             String lowestHighestHtml = AmazonConstants.PRICE_HISTORY_LOWEST_HIGHEST_PRICE_TABLE_HTML
                     .replace("$lowestPrice" , String.valueOf(lowestPrice))
                     .replace("$highestPrice" , String.valueOf(highestPrice));
             jse.executeScript("var ele=arguments[0]; ele.innerHTML = '" + lowestHighestHtml + "';", element);
-            this.drawBorderById(browser, PriceHistoryConstants.PRICE_HISTORY_DIV);
+            boolean isPHEleVisible = browser.findElement(By.id(PriceHistoryConstants.PRICE_HISTORY_DIV_ID)).isDisplayed();
+            if (!isPHEleVisible) {
+                ((JavascriptExecutor) browser).executeScript("window.scrollBy(0,10)");
+            }
+            this.drawBorderById(browser, PriceHistoryConstants.PRICE_HISTORY_DIV_ID);
         } else {
             log.info("PRICE_HISTORY_REPLACE_DIV is not available for the product " + lowestPrice + " " + highestPrice);
         }

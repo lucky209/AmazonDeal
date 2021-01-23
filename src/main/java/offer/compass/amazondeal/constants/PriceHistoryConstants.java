@@ -10,8 +10,8 @@ public class PriceHistoryConstants {
     public static final String PRICE_HISTORY_URL_XPATH = "/html/body/div[2]/div/div/div/div[2]/div[1]/input";
     public static final String PRICE_HISTORY_TRACK_SEARCH_ID = "trackPriceBtn";
     public static final String GRAPH_CLASS = "highcharts-background";
-    public static final String PRICE_HISTORY_REPLACE_DIV = "dynamicDeliveryMessage_feature_div";
-    public static final String PRICE_HISTORY_DIV = "pricehistory";
+    public static final String PRICE_HISTORY_REPLACE_DIV_ID = "dynamicDeliveryMessage_feature_div";
+    public static final String PRICE_HISTORY_DIV_ID = "pricehistory";
     public static final String DEPT_CSS_CLASS = ".a-unordered-list.a-horizontal.a-size-small";
     public static int URLS_PROCESSED = 0;
     public static int SCREENSHOT_PROCESSED = 0;
