@@ -43,7 +43,7 @@ public class AmazonConstants {
 
     public static final String PRICE_HISTORY_LOWEST_HIGHEST_PRICE_TABLE_HTML=
             "<div>" +
-                "<span id="+ PriceHistoryConstants.PRICE_HISTORY_DIV +" style=\"width: 320px;\" class=\"a-size-base priceBlockDealPriceString\">" +
+                "<span id="+ PriceHistoryConstants.PRICE_HISTORY_DIV_ID +" style=\"width: 320px;\" class=\"a-size-base priceBlockDealPriceString\">" +
                     "<b>Lowest Price:</b>" +
                     "<span>" +
                         "₹$lowestPrice.00      " +

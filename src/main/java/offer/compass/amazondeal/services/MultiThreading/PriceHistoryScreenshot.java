@@ -68,6 +68,23 @@ public class PriceHistoryScreenshot extends Thread {
                 Thread.sleep(500);
             } catch (Exception ex) {
                 log.info("Exception occurred for the url " + browser.getCurrentUrl());
+                log.info("So retrying...");
+                try {
+                    browser.get(priceHistoryList.get(i).getUrl());
+                    Thread.sleep(1000);
+                    priceHistoryHelper.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REGULAR_PRICE_DIV_ID);
+                    priceHistoryHelper.drawBorderById(browser, AmazonConstants.TODAYS_DEAL_REVIEW_ID);
+                    priceHistoryHelper.drawBorderLowestAndHighestPriceElement(browser,
+                            priceHistory.getLowestPrice(), priceHistory.getHighestPrice());
+                    Thread.sleep(250);
+                    String dept = this.getDepartment(browser, priceHistory.isDotd());
+                    priceHistoryHelper.takeAmazonProductScreenShot(browser, dept ,
+                            priceHistory.getProductName());
+                    Thread.sleep(500);
+                } catch (Exception e) {
+                    log.info("Exception occurred again..Switching to next tab");
+                    continue;
+                }
                 //todo create exception handling
             }
             PriceHistoryConstants.SCREENSHOT_PROCESSED++;
@@ -77,7 +94,7 @@ public class PriceHistoryScreenshot extends Thread {
         browser.quit();
     }
 
-    private String getDepartment(WebDriver browser, boolean dotd) {
+    private String getDepartment(WebDriver browser, boolean dotd) throws Exception {
         boolean isEleAvail = !browser.findElements(By.cssSelector(PriceHistoryConstants.DEPT_CSS_CLASS)).isEmpty();
         if (isEleAvail) {
             if (dotd)
@@ -85,7 +102,7 @@ public class PriceHistoryScreenshot extends Thread {
             else
                 return this.constructDeptPath(browser);
         }
-        return "Unknown";
+        throw new Exception("Could not fetch department...");
     }
 
     private String constructDeptPath(WebDriver browser) {
